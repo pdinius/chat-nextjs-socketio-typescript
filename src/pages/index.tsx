@@ -4,6 +4,7 @@ import Image from 'next/image'
 import SocketIOClient from "socket.io-client";
 import Chat from "./components/Chats";
 import ButtonAction from "./components/ButtonAction";
+import styles from "./Home.module.scss";
 
 import CustomInput from "./components/CustomInput";
 
@@ -18,6 +19,7 @@ const user = "User_" + String(new Date().getTime()).substr(-3);
 export default function Home() {
   const inputRef = useRef(null);
   // connected flag
+  const [userId, setUserId] = useState("");
   const [connected, setConnected] = useState<boolean>(false);
 
   // init chat and message
@@ -33,8 +35,16 @@ export default function Home() {
 
     // log socket connection
     socket.on("connect", () => {
+      setUserId(socket.id);
       console.log("SOCKET CONNECTED!", socket.id);
       setConnected(true);
+      fetch("/api/update", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: socket.id }),
+      });
     });
 
     // update chat on new message dispatched
@@ -75,7 +85,7 @@ export default function Home() {
   return (
     <div className="flex flex-col w-full h-screen">
       <div className="py-4 text-[#9580ff] border-2 border-[#9580ff] bg-gray-600 sticky top-0">
-        <h1 className="text-center text-2xl font-semibold">Realtime Chat App</h1>
+        <h1 className="text-center text-2xl font-semibold">Realtime Chat App - {userId}</h1>
         <h2 className="mt-2 text-center">with Next.js and Socket.io</h2>
       </div>
       <div className="flex flex-col flex-1 bg-gray-800">
